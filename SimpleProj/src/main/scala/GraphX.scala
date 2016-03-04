@@ -22,9 +22,9 @@ object PageRank {
     val sc = new SparkContext(conf)
 
     val finalData = sc.textFile(File)
-    val lines = Data.flatMap(file => file.split("\n"))
+    val lines = finalData.flatMap(file => file.split("\n"))
 
-    val links = Data.map{line =>
+    val links = finalData.map{line =>
       val finalfields = line.split("\t")
       val xml = Jsoup.parse(finalfields(3).replace("\\n", "\n"))
       val targets = xml.getElementsByTag("target")

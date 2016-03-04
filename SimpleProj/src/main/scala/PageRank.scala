@@ -21,7 +21,7 @@ object SimpleApp {
     val PageData = sc.textFile(File)
     val lines = PageData.flatMap(file => file.split("\n"))
     
-    val links = Data.map{line =>
+    val links = PageData.map{line =>
           val filefields = line.split("\t")
           val xml = Jsoup.parse(filefields(3).replace("\\n", "\n"))
           val targets = xml.getElementsByTag("target")
@@ -37,13 +37,13 @@ object SimpleApp {
     val iters = args(2).toInt
 
     for (i <- 1 to iters) {
-      val contribs = links.join(ranks).values.flatMap{ case (urls, rank) =>
+      val contribs = links.join(finalranks).values.flatMap{ case (urls, rank) =>
         val size = urls.size
         urls.map(url => (url, rank / size))
       }
       finalranks = contribs.reduceByKey(_ + _).mapValues(0.15 + 0.85 * _)
     }
-      val output = ranks.map(item =>item.swap).sortByKey(false,1).take(100)
+      val output = finalranks.map(item =>item.swap).sortByKey(false,1).take(100)
       val temp = sc.parallelize(output)
       temp.coalesce(1).saveAsTextFile(args(1))
 	sc.stop()
